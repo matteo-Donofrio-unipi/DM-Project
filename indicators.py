@@ -1,7 +1,9 @@
-from typing import Dict
+from datetime import datetime
+from typing import Dict, Union
 from pandas import DataFrame
+from pandas.core.series import Series
 
-def customer_features(customer_df: DataFrame) -> Dict[str, int]:
+def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     """Features che identificano un cliente.
 
     Args:
@@ -14,8 +16,25 @@ def customer_features(customer_df: DataFrame) -> Dict[str, int]:
     items: int = customer_df["ProdID"].count()
     # Distinct items bought by a customer in the period of observation
     distinct_items: int = customer_df["ProdID"].nunique()
-
+    # TODO: Altri due obbligatori
+    # Sotto-dataframe con i record positivi e negativi
+    positive_df: DataFrame = customer_df[customer_df["Qta"] > 0]
+    negative_df: DataFrame = customer_df[customer_df["Qta"] < 0]
+    # Totale degli acquisti dell'utente (entrate per il negozio)
+    spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
+    # Prodotti restituiti (uscite per il negozio)
+    returning: float = (negative_df["Sale"] * positive_df["Qta"]).sum()
+    # Series con i ProdID più acquistati
+    most_bought_series: Series = positive_df["ProdID"].mode(dropna=True)
+    # ProdID più acquistato, se esiste
+    most_bought: str = most_bought_series.iloc[0] if most_bought_series.size > 0 else None
+    # TODO: Ora / Mese del giorno di maggiore visita
+    
     return {
         "I": items,
-        "Iu": distinct_items
+        "Iu": distinct_items,
+        "spending": spending,
+        # Altri due obbligatori
+        "returning": returning,
+        "most_bought": most_bought
     }
