@@ -1,4 +1,4 @@
 .vscode
 *.csv
-**/__pycache__
+**/__pycache__/**
 tips_data_understanding.ipynb

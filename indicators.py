@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Dict, Union
 from pandas import DataFrame
 from pandas.core.series import Series
@@ -23,12 +23,23 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
     # Prodotti restituiti (uscite per il negozio)
-    returning: float = (negative_df["Sale"] * positive_df["Qta"]).sum()
-    # Series con i ProdID più acquistati
+    returning: float = (negative_df["Sale"] * negative_df["Qta"]).sum()
+    # Series con i ProdID più acquistati / restituiti
     most_bought_series: Series = positive_df["ProdID"].mode(dropna=True)
+    most_returned_series: Series = negative_df["ProdID"].mode(dropna=True)
     # ProdID più acquistato, se esiste
     most_bought: str = most_bought_series.iloc[0] if most_bought_series.size > 0 else None
-    # TODO: Ora / Mese del giorno di maggiore visita
+    # ProdID più restituito, se esiste
+    most_returned: str = most_returned_series.iloc[0] if most_returned_series.size > 0 else None
+    # Ora / Mese del giorno di maggiore visita
+    hour: datetime = customer_df.groupby(
+        customer_df["BasketDate"].dt.hour
+    )["BasketDate"].value_counts().mode().iloc[0]
+    month: datetime = customer_df.groupby(
+        customer_df["BasketDate"].dt.month
+    )["BasketDate"].value_counts().mode().iloc[0]
+    # Numero di BasketID distinti
+    baskets: int = customer_df["BasketID"].nunique()
     
     return {
         "I": items,
@@ -36,5 +47,9 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "spending": spending,
         # Altri due obbligatori
         "returning": returning,
-        "most_bought": most_bought
+        "most_bought": most_bought,
+        "most_returned": most_returned,
+        "hour": hour,
+        "month": month,
+        "baskets": baskets
     }
