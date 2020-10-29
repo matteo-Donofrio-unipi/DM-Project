@@ -3,6 +3,7 @@ from typing import Dict, Union
 from pandas import DataFrame
 from pandas.core.series import Series
 
+
 def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     """Features che identificano un cliente.
 
@@ -17,9 +18,24 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Distinct items bought by a customer in the period of observation
     distinct_items: int = customer_df["ProdID"].nunique()
     # TODO: Altri due obbligatori
+
     # Sotto-dataframe con i record positivi e negativi
     positive_df: DataFrame = customer_df[customer_df["Qta"] > 0]
     negative_df: DataFrame = customer_df[customer_df["Qta"] < 0]
+
+    # Numero massimo di item acquistati in una sessione
+    maximum_items: int = max(customer_df.groupby(["BasketID"])["Qta"].sum())
+
+    #numero totale di prodotti restituiti
+    total_returned_items: int = abs(negative_df["Qta"].sum())
+
+    #paese in cui ha effettuato piu sessioni
+    q=customer_df.groupby(["CustomerCountry"],as_index=False)["BasketID"].count()
+    q=q.sort_values(by="BasketID",ascending=False)
+
+    favorite_country: str = q.iloc[0]["CustomerCountry"]
+
+
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
     # Prodotti restituiti (uscite per il negozio)
@@ -45,7 +61,9 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "I": items,
         "Iu": distinct_items,
         "spending": spending,
-        # Altri due obbligatori
+        "Imax": maximum_items,
+        "returned_items":total_returned_items,
+        "best_country":favorite_country,
         "returning": returning,
         "most_bought": most_bought,
         "most_returned": most_returned,
