@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Dict, Union
 from pandas import DataFrame
 from pandas.core.series import Series
-
+from scipy.stats import entropy
 
 def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     """Features che identificano un cliente.
@@ -35,6 +35,10 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
 
     favorite_country: str = q.iloc[0]["CustomerCountry"]
 
+    #entropia del comportamento utente ( entorpia del tipo di prodotto acquistato )
+
+    q=positive_df.groupby(["ProdID"],as_index=False)["Qta"].sum()
+    E: float =entropy(q['Qta'].values, base=2)
 
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
@@ -69,5 +73,6 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "most_returned": most_returned,
         "hour": hour,
         "month": month,
-        "baskets": baskets
+        "baskets": baskets,
+        "E":E
     }
