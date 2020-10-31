@@ -52,12 +52,8 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # ProdID più restituito, se esiste
     most_returned: str = most_returned_series.iloc[0] if most_returned_series.size > 0 else None
     # Ora / Mese del giorno di maggiore visita
-    hour: datetime = customer_df.groupby(
-        customer_df["BasketDate"].dt.hour
-    )["BasketDate"].value_counts().mode().iloc[0]
-    month: datetime = customer_df.groupby(
-        customer_df["BasketDate"].dt.month
-    )["BasketDate"].value_counts().mode().iloc[0]
+    hour: datetime = customer_df["BasketDate"].dt.hour.mode()[0]
+    month: datetime = customer_df["BasketDate"].dt.month.mode()[0]
     # Numero di BasketID distinti
     baskets: int = customer_df["BasketID"].nunique()
     
