@@ -36,7 +36,7 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
 
     favorite_country: str = q.iloc[0]["CustomerCountry"]
 
-    # entropia del comportamento utente ( entorpia del tipo di prodotto acquistato )
+    # entropia del comportamento utente ( 0 = compra sempre stesso oggetto, 1 = equidistibuito  )
 
     q = positive_df.groupby(["ProdID"], as_index=False)["Qta"].sum()
     E: float = entropy(q['Qta'].values, base=2)
@@ -50,9 +50,9 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Costo medio pagato
     avg_bought: float = positive_df["Sale"].mean()
     # Massimo costo di un prodotto restituito
-    min_cost: float = negative_df["Sale"].min()
+    min_cost: float = negative_df["Sale"].max()
     # Costo medio restituito
-    avg_returned: float = positive_df["Sale"].mean()
+    avg_returned: float = negative_df["Sale"].mean()
     # Costo del prodotto più acquistato/restituito dall'utente
     most_bought_cost: float = positive_df["Sale"].mode().get(0, 0)
     most_returned_cost: float = negative_df["Sale"].mode().get(0, 0)
