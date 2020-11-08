@@ -43,8 +43,8 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
 
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
-    # Prodotti restituiti (uscite per il negozio)
-    returning: float = (negative_df["Sale"] * negative_df["Qta"]).sum()
+    # Soldi restituiti (uscite per il negozio)
+    returning: float = abs((negative_df["Sale"] * negative_df["Qta"]).sum())
     # Massimo costo pagato dall'utente
     max_cost: float = positive_df["Sale"].max(skipna=True)
     # Costo medio pagato
