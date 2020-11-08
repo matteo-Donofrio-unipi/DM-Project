@@ -50,9 +50,9 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Costo medio pagato
     avg_bought: float = positive_df["Sale"].mean(skipna=True)
     # Massimo costo di un prodotto restituito
-    min_cost: float = negative_df["Sale"].min(skipna=True)
+    min_cost: float = negative_df["Sale"].max(skipna=True)
     # Costo medio restituito
-    avg_returned: float = positive_df["Sale"].mean(skipna=True)
+    avg_returned: float = negative_df["Sale"].mean(skipna=True)
     # Costo del prodotto più acquistato/restituito dall'utente
     most_bought_cost: float = positive_df["Sale"].mode().get(0, 0)
     most_returned_cost: float = negative_df["Sale"].mode().get(0, 0)
