@@ -4,6 +4,7 @@ from pandas import DataFrame
 from pandas.core.series import Series
 from scipy.stats import entropy
 
+
 def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     """Features che identificano un cliente.
 
@@ -14,7 +15,7 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         Dict: Features estratte dai record dell'utente.
     """
     # Total number of items purchased by a customer during the period
-    items: int = customer_df["ProdID"].count()
+    items: int = customer_df["Qta"].sum()
     # Distinct items bought by a customer in the period of observation
     distinct_items: int = customer_df["ProdID"].nunique()
     # TODO: Altri due obbligatori
@@ -26,19 +27,19 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Numero massimo di item acquistati in una sessione
     maximum_items: int = max(customer_df.groupby(["BasketID"])["Qta"].sum())
 
-    #numero totale di prodotti restituiti
+    # numero totale di prodotti restituiti
     total_returned_items: int = abs(negative_df["Qta"].sum())
 
-    #paese in cui ha effettuato piu sessioni
-    q=customer_df.groupby(["CustomerCountry"],as_index=False)["BasketID"].count()
-    q=q.sort_values(by="BasketID",ascending=False)
+    # paese in cui ha effettuato piu sessioni
+    q = customer_df.groupby(["CustomerCountry"], as_index=False)["BasketID"].count()
+    q = q.sort_values(by="BasketID", ascending=False)
 
     favorite_country: str = q.iloc[0]["CustomerCountry"]
 
-    #entropia del comportamento utente ( entorpia del tipo di prodotto acquistato )
+    # entropia del comportamento utente ( 0 = compra sempre stesso oggetto, 1 = equidistibuito  )
 
-    q=positive_df.groupby(["ProdID"],as_index=False)["Qta"].sum()
-    E: float =entropy(q['Qta'].values, base=2)
+    q = positive_df.groupby(["ProdID"], as_index=False)["Qta"].sum()
+    E: float = entropy(q['Qta'].values, base=2)
 
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
@@ -60,14 +61,14 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     month: datetime = customer_df["BasketDate"].dt.month.mode()[0]
     # Numero di BasketID distinti
     baskets: int = customer_df["BasketID"].nunique()
-    
+
     return {
         "I": items,
         "Iu": distinct_items,
         "spending": spending,
         "Imax": maximum_items,
-        "returned_items":total_returned_items,
-        "best_country":favorite_country,
+        "returned_items": total_returned_items,
+        "best_country": favorite_country,
         "returning": returning,
         "max_cost": max_cost,
         "min_cost": min_cost,
@@ -78,5 +79,5 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "hour": hour,
         "month": month,
         "baskets": baskets,
-        "E":E
+        "E": E
     }
