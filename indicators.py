@@ -44,13 +44,17 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
     # Prodotti restituiti (uscite per il negozio)
     returning: float = (negative_df["Sale"] * negative_df["Qta"]).sum()
-    # Series con i ProdID più acquistati / restituiti
-    most_bought_series: Series = positive_df["ProdID"].mode(dropna=True)
-    most_returned_series: Series = negative_df["ProdID"].mode(dropna=True)
-    # ProdID più acquistato, se esiste
-    most_bought: str = most_bought_series.iloc[0] if most_bought_series.size > 0 else None
-    # ProdID più restituito, se esiste
-    most_returned: str = most_returned_series.iloc[0] if most_returned_series.size > 0 else None
+    # Massimo costo pagato dall'utente
+    max_cost: float = positive_df["Sale"].max(skipna=True)
+    # Costo medio pagato
+    avg_bought: float = positive_df["Sale"].mean(skipna=True)
+    # Massimo costo di un prodotto restituito
+    min_cost: float = negative_df["Sale"].min(skipna=True)
+    # Costo medio restituito
+    avg_returned: float = positive_df["Sale"].mean(skipna=True)
+    # Costo del prodotto più acquistato/restituito dall'utente
+    most_bought_cost: float = positive_df["Sale"].mode().get(0, 0)
+    most_returned_cost: float = negative_df["Sale"].mode().get(0, 0)
     # Ora / Mese del giorno di maggiore visita
     hour: datetime = customer_df["BasketDate"].dt.hour.mode()[0]
     month: datetime = customer_df["BasketDate"].dt.month.mode()[0]
@@ -65,8 +69,12 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "returned_items":total_returned_items,
         "best_country":favorite_country,
         "returning": returning,
-        "most_bought": most_bought,
-        "most_returned": most_returned,
+        "max_cost": max_cost,
+        "min_cost": min_cost,
+        "most_bought_cost": most_bought_cost,
+        "most_returned_cost": most_returned_cost,
+        "avg_bought": avg_bought,
+        "avg_returned": avg_returned,
         "hour": hour,
         "month": month,
         "baskets": baskets,
