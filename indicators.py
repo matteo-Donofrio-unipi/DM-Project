@@ -27,9 +27,6 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     # Numero massimo di item acquistati in una sessione
     maximum_items: int = max(customer_df.groupby(["BasketID"])["Qta"].sum())
 
-    # numero totale di prodotti restituiti
-    total_returned_items: int = abs(negative_df["Qta"].sum())
-
     # paese in cui ha effettuato piu sessioni
     q = customer_df.groupby(["CustomerCountry"], as_index=False)["BasketID"].count()
     q = q.sort_values(by="BasketID", ascending=False)
@@ -43,8 +40,6 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
 
     # Totale degli acquisti dell'utente (entrate per il negozio)
     spending: float = (positive_df["Sale"] * positive_df["Qta"]).sum()
-    # Soldi restituiti (uscite per il negozio)
-    returning: float = abs((negative_df["Sale"] * negative_df["Qta"]).sum())
     # Massimo costo pagato dall'utente
     max_cost: float = positive_df["Sale"].max(skipna=True)
     # Costo medio pagato
@@ -53,9 +48,6 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
     min_cost: float = negative_df["Sale"].max(skipna=True)
     # Costo medio restituito
     avg_returned: float = negative_df["Sale"].mean(skipna=True)
-    # Costo del prodotto più acquistato/restituito dall'utente
-    most_bought_cost: float = positive_df["Sale"].mode().get(0, 0)
-    most_returned_cost: float = negative_df["Sale"].mode().get(0, 0)
     # Ora / Mese del giorno di maggiore visita
     hour: datetime = customer_df["BasketDate"].dt.hour.mode()[0]
     month: datetime = customer_df["BasketDate"].dt.month.mode()[0]
@@ -67,13 +59,9 @@ def customer_features(customer_df: DataFrame) -> Dict[str, Union[int, float]]:
         "Iu": distinct_items,
         "spending": spending,
         "Imax": maximum_items,
-        "returned_items": total_returned_items,
         "best_country": favorite_country,
-        "returning": returning,
         "max_cost": max_cost,
         "min_cost": min_cost,
-        "most_bought_cost": most_bought_cost,
-        "most_returned_cost": most_returned_cost,
         "avg_bought": avg_bought,
         "avg_returned": avg_returned,
         "hour": hour,
